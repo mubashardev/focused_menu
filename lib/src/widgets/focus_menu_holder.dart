@@ -36,6 +36,7 @@ class FocusedMenuHolder extends StatefulWidget {
   final Color? blurBackgroundColor;
   final double? bottomOffsetHeight;
   final double? menuOffset;
+  final Widget Function(BuildContext)? menuBuilder;
 
   /// Actions to be shown in the toolbar.
   final List<Widget>? toolbarActions;
@@ -49,10 +50,10 @@ class FocusedMenuHolder extends StatefulWidget {
   final VoidCallback? onOpened;
   final VoidCallback? onClosed;
 
-  const FocusedMenuHolder({
+  FocusedMenuHolder({
     Key? key,
     required this.child,
-    required this.menuItems,
+    this.menuItems = const [],
     this.onPressed,
     this.duration,
     this.menuBoxDecoration,
@@ -67,9 +68,12 @@ class FocusedMenuHolder extends StatefulWidget {
     this.enableMenuScroll = true,
     this.openWithTap = false,
     this.controller,
+    this.menuBuilder,
     this.onOpened,
     this.onClosed,
-  }) : super(key: key);
+  })  : assert((menuItems.isEmpty && menuBuilder != null) || (menuItems.isNotEmpty && menuBuilder == null),
+            'If menuItems is empty, menuBuilder must be provided, and if menuBuilder is null, menuItems should not be empty'),
+        super(key: key);
 
   @override
   _FocusedMenuHolderState createState() => _FocusedMenuHolderState(controller);
@@ -87,8 +91,7 @@ class _FocusedMenuHolderState extends State<FocusedMenuHolder> {
   }
 
   void _getOffset() {
-    RenderBox renderBox =
-        containerKey.currentContext!.findRenderObject() as RenderBox;
+    RenderBox renderBox = containerKey.currentContext!.findRenderObject() as RenderBox;
     Size size = renderBox.size;
     Offset offset = renderBox.localToGlobal(Offset.zero);
     setState(() {
@@ -130,6 +133,7 @@ class _FocusedMenuHolderState extends State<FocusedMenuHolder> {
             child: FocusedMenuDetails(
               itemExtent: widget.menuItemExtent,
               menuBoxDecoration: widget.menuBoxDecoration,
+              menuBuilder: widget.menuBuilder,
               child: widget.child,
               childOffset: childOffset,
               childSize: childSize,
